@@ -3,6 +3,7 @@
 #include <QByteArray>
 #include <QDebug>
 #include <QMessageBox>
+#include <QHostAddress>
 
 TcpClient::TcpClient(QWidget *parent)
     : QWidget(parent)
@@ -10,6 +11,14 @@ TcpClient::TcpClient(QWidget *parent)
 {
     ui->setupUi(this);
     loadConfig();
+
+    connect(&m_tcpSocket,
+            SIGNAL(connected()),    // Sender
+            this,                   // Receiver
+            SLOT(showConnect()));   // Success received then...
+
+    // Connect to host.
+    m_tcpSocket.connectToHost(QHostAddress(m_strIP), m_usPort);
 }
 
 TcpClient::~TcpClient()
@@ -39,10 +48,14 @@ void TcpClient::loadConfig()
 
         m_strIP = strList.at(0);
         m_usPort = strList.at(1).toUShort();
-        qDebug() << "ip: " << m_strIP << " port: " << m_usPort;
     }
     else
     {
         QMessageBox::critical(this, "open config", "open config failed");
     }
+}
+
+void TcpClient::showConnect()
+{
+    QMessageBox::information(this, "Connect host", "Connect success!");
 }
